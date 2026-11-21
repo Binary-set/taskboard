@@ -1,4 +1,8 @@
-from fastapi import FastAPI
+from fastapi import @"
+Host github.com
+  Hostname ssh.github.com
+  Port 443
+  User git
 
 app = FastAPI()
 
