@@ -1,11 +1,6 @@
-from fastapi import @"
-Host github.com
-  Hostname ssh.github.com
-  Port 443
-  User git
+from fastapi import FastAPI
 
 app = FastAPI()
-
 
 @app.get("/")
 def read_root():
