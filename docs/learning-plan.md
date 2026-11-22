@@ -102,10 +102,10 @@ Python 3.11.9 + uv + FastAPI + Pydantic v2 + SQLAlchemy 2.1（同步 Session）+
 - [~] 阶段 2 语言核心
   - [~] W1 命令行打卡工具 daily.py
     - [x] Day1 第一个脚本：变量/类型/f-string/datetime
-    - [ ] Day2 列表与字典：存打卡记录
-    - [ ] Day3 pathlib + json：持久化到用户目录
-    - [ ] Day4 argparse 三个子命令 add/list/stats
-    - [ ] Day5 stats 文本柱状图 + 产出 samples/daily-output.txt
+    - [×] Day2 列表与字典：存打卡记录
+    - [x] Day3 pathlib + json：持久化到用户目录
+    - [x] Day4 argparse 三个子命令 add/list/stats
+    - [x] Day5 stats 文本柱状图 + 产出 samples/daily-output.txt
   - [ ] W2 看板领域模型(dataclass/Enum) + Markdown 周报
   - [ ] W3 CSV 清洗 + 类型注解 + logging + 异常处理
 - [ ] 阶段 3 工程习惯
