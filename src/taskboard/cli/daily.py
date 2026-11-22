@@ -3,7 +3,7 @@ import argparse
 # json：标准库，把 Python 对象与 JSON 文本互相转换（写入/读取磁盘文件用）
 import json
 # 从标准库 datetime 模块只导入 date 类，用于获取“今天”的日期
-from datetime import date
+from datetime import date, timedelta
 # 从标准库 pathlib 模块只导入 Path 类，用面向对象方式安全地拼路径、读写文件
 from pathlib import Path
 
@@ -41,27 +41,47 @@ def save_records(records: list[dict]) -> None:
     # 将 JSON 文本写入文件，同样显式 encoding="utf-8"；write_text 会覆盖旧内容
 
 
-def cmd_add(args: argparse.Namespace) -> None:
-    # 作用：处理 `add` 子命令——新增一条打卡记录
-    # args 是 argparse 解析后存放各参数的对象（Namespace），字段名与 add_argument 对应
+def cmd_stats(args: argparse.Namespace) -> None:
+    # 作用：处理 `stats` 子命令——先打印总体完成率，再打印最近 7 天的打卡次数柱状图
     records = load_records()
-    # 先读出已有记录，才能在其基础上追加（否则覆盖会丢历史数据）
-    records.append({
-        "habit": args.habit,
-        # args.habit 来自 add 的位置参数 habit
-        "date": args.date or date.today().isoformat(),
-        # 若用户传了 --date 就用它；否则用“今天”
-        # date.today() 取当天对象，.isoformat() 转成 'YYYY-MM-DD' 字符串
-        # 这里用 or 实现“左边为空/None 则取右边”的默认值逻辑
-        "done": True,
-        # add 语义即“完成打卡”，故 done 固定为 True（注意首字母大写的 True）
-        "minutes": args.minutes,
-        # args.minutes 来自 --minutes，未提供时默认 0（在 add_argument 里设的 default）
-    })
-    save_records(records)
-    # 把追加后的完整列表写回磁盘
-    print(f"已记录：{args.habit} {args.minutes} 分钟")
-    # 给用户一行确认反馈
+    # 从磁盘读出全部打卡记录
+
+    total = len(records)
+    # 记录总条数
+    done = sum(1 for r in records if r["done"])
+    # 生成器表达式：对每条 done 为真的记录产出 1 再求和，得到"完成"的条数
+    rate = (done / total * 100) if total else 0
+    # 完成率；用 `if total else 0` 防止 total 为 0 时除以零（边界情况）
+    print(f"总计 {total} 条，完成 {done} 条，完成率 {rate:.1f}%")
+    # 输出总体统计；{rate:.1f} 把浮点数格式化成保留 1 位小数
+
+    print("\n最近 7 天打卡次数：")
+    # 空一行后打印图表标题（\n 是换行符）
+
+    counts: dict[str, int] = {}
+    # counts 用来存"日期 -> 当天打卡次数"的映射
+    # 变量也带类型注解：dict[str, int] 表示键是日期字符串、值是整数（仅提示用途）
+    for r in records:
+        # 遍历每条记录，累加它所属日期的次数
+        counts[r["date"]] = counts.get(r["date"], 0) + 1
+        # dict.get(键, 默认值)：键不存在时返回默认 0，避免 KeyError
+        # 整体含义：该日期已有计数 + 本次的 1
+
+    today = date.today()
+    # 取"今天"作为 7 天窗口的最后一天
+
+    for i in range(6, -1, -1):
+        # range(6, -1, -1) 产生 6,5,4,3,2,1,0（步长 -1 递减）
+        # 即"从今天往前数 6 天，一直到今天"，共 7 天，且按时间先后顺序输出
+        d = (today - timedelta(days=i)).isoformat()
+        # today - timedelta(days=i) 得到 i 天前的日期对象
+        # .isoformat() 转成 'YYYY-MM-DD' 字符串，才能和 counts 里的键对上
+        n = counts.get(d, 0)
+        # 取该天的打卡次数；那天没有记录则默认 0
+        bar = "█" * n
+        # 用 n 个方块字符拼成条形（次数越多条越长）
+        print(f"{d} | {bar} {n}")
+        # 输出：日期 | 柱状条 次数
 
 
 def cmd_list(args: argparse.Namespace) -> None:
@@ -83,19 +103,27 @@ def cmd_list(args: argparse.Namespace) -> None:
         # 注意：外层用双引号，内层取键用单引号，避免引号冲突
 
 
-def cmd_stats(args: argparse.Namespace) -> None:
-    # 作用：处理 `stats` 子命令——统计总量与完成率
+def cmd_add(args: argparse.Namespace) -> None:
+    # 作用：处理 `add` 子命令——新增一条打卡记录
+    # args 是 argparse 解析后存放各参数的对象（Namespace），字段名与 add_argument 对应
     records = load_records()
-    total = len(records)
-    # len() 求列表长度，即记录总条数
-    done = sum(1 for r in records if r["done"])
-    # 生成器表达式：对每条 done 为真的记录产出 1，再求和，得到“完成”的条数
-    # 等价于逐条 if r["done"] 累加，但一行写完
-    rate = (done / total * 100) if total else 0
-    # 完成率 = 完成数 / 总数 * 100
-    # 外层 if total else 0 防止 total 为 0 时除以零报错（边界情况）
-    print(f"总计 {total} 条，完成 {done} 条，完成率 {rate:.1f}%")
-    # {rate:.1f} 把浮点数格式化为保留 1 位小数
+    # 先读出已有记录，才能在其基础上追加（否则直接覆盖会丢历史数据）
+    records.append({
+        "habit": args.habit,
+        # args.habit 来自 add 的位置参数 habit
+        "date": args.date or date.today().isoformat(),
+        # 若用户传了 --date 就用它；否则用“今天”
+        # date.today() 取当天对象，.isoformat() 转成 'YYYY-MM-DD' 字符串
+        # 用 or 实现“左边为空/None 则取右边”的默认值逻辑
+        "done": True,
+        # add 语义即“完成打卡”，故 done 固定为 True（注意首字母大写的 True）
+        "minutes": args.minutes,
+        # args.minutes 来自 --minutes，未提供时默认 0（在 add_argument 里设的 default）
+    })
+    save_records(records)
+    # 把追加后的完整列表写回磁盘
+    print(f"已记录：{args.habit} {args.minutes} 分钟")
+    # 给用户一行确认反馈
 
 
 def build_parser() -> argparse.ArgumentParser:
