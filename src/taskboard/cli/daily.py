@@ -130,9 +130,9 @@ def build_parser() -> argparse.ArgumentParser:
     # 作用：搭建并返回命令行的解析器（把“定义命令结构”单独成函数，便于测试与阅读）
     parser = argparse.ArgumentParser(prog="daily", description="命令行打卡工具")
     # prog 指定帮助信息里显示的程序名；description 是 --help 顶部的说明文字
-    sub = parser.add_subparsers(dest="command", required=True)
+    sub = parser.add_subparsers(dest="command", required=False)
     # 注册子命令集合；dest="command" 表示把用户选的子命令名存进 args.command
-    # required=True 强制必须给一个子命令，否则报错退出
+    # required=False 不给子命令不算错误，交给main函数处理
     p_add = sub.add_parser("add", help="添加一条打卡记录")
     # 定义名为 add 的子命令；help 出现在父级 --help 列表里
     p_add.add_argument("habit", help="习惯名称")
@@ -162,6 +162,10 @@ def main() -> None:
     args = parser.parse_args()
     # 解析实际传入的命令行参数，得到 Namespace 对象 args
     # 若缺少必填子命令/参数，parse_args 会自动打印错误并以非零状态退出
+    if not args.command:
+        # 如果没有提供子命令，打印帮助信息并退出
+        parser.print_help()
+        return
     args.func(args)
     # 根据 args.func（由 set_defaults 决定）调用对应处理函数，并把 args 传进去
     # 这是 argparse 推荐的“分发”写法，省去手写 if args.command == ... 分支
