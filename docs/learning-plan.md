@@ -1,3 +1,4 @@
+
 # Python Web 全栈学习计划与进度
 
 > 本文件是主线导航。每次学习：先看「进度追踪」确认走到哪，再看对应阶段详情执行，最后更新进度。
@@ -100,13 +101,19 @@ Python 3.11.9 + uv + FastAPI + Pydantic v2 + SQLAlchemy 2.1（同步 Session）+
   - [x] 检查点7 十题闭卷自测（改为逐题讲解）
   - [x] PyCharm 解释器绑定到 taskboard/.venv
 - [~] 阶段 2 语言核心
-  - [~] W1 命令行打卡工具 daily.py
+  - [x] W1 命令行打卡工具 daily.py
     - [x] Day1 第一个脚本：变量/类型/f-string/datetime
-    - [×] Day2 列表与字典：存打卡记录
+    - [x] Day2 列表与字典：存打卡记录
     - [x] Day3 pathlib + json：持久化到用户目录
     - [x] Day4 argparse 三个子命令 add/list/stats
     - [x] Day5 stats 文本柱状图 + 产出 samples/daily-output.txt
-  - [ ] W2 看板领域模型(dataclass/Enum) + Markdown 周报
+    - [x] 复习 D+1/D+2 闭卷默写 load_records / save_records
+  - [~] W2 看板领域模型(dataclass/Enum) + Markdown 周报
+    - [x] Day6 Enum：TaskStatus / TaskPriority + status_to_chinese + domain 包骨架
+    - [ ] Day7 dataclass：Task 对象 + 可变默认值陷阱 + python -m 运行方式
+    - [ ] Day8 对象行为与关系：Board 持有 Task 列表（一对多）与实例方法
+    - [ ] Day9 对象 ↔ 字典 ↔ JSON：asdict 落盘与从 JSON 重建对象
+    - [ ] Day10 Markdown 周报生成器 + 产出 samples/weekly-report.md
   - [ ] W3 CSV 清洗 + 类型注解 + logging + 异常处理
 - [ ] 阶段 3 工程习惯
 - [ ] 阶段 4 HTTP 与数据库
@@ -118,10 +125,20 @@ Python 3.11.9 + uv + FastAPI + Pydantic v2 + SQLAlchemy 2.1（同步 Session）+
 
 ## 学习日志（倒序追加）
 
-- 阶段1 全部通过：uv 环境、src 布局、FastAPI Hello World、GitHub 推送(SSH over 443)、可复现演练、排错手册。踩坑已沉淀至 env-checklist.md（含 winget 需重开终端、uv run 需在项目根、main.py 需在 src 包内、PowerShell UTF-8 BOM、GitHub 22 端口、PSReadLine 粘贴崩溃等）。
+- 阶段2 Day6：建 domain 包，写 TaskStatus / TaskPriority 两个枚举与 status_to_chinese；掌握 Enum 混入 str 的意义、.value 与 .name、按值(圆括号)/按名(方括号)反查；练习结论——裸字符串拼错**不会**抛异常（错误静默漂移到远处才暴露），枚举把失败点提前到边界。
+- 阶段2 Day5：stats 增加最近 7 天柱状图，产出 samples/daily-output.txt。踩坑：替换函数时误删 cmd_add 引发 NameError，并遗留同名 cmd_stats 被后定义覆盖——教训：改完必须 git diff 复核，且"能跑就立刻提交"。
+- 阶段2 Day4：argparse 三子命令 add/list/stats，掌握 set_defaults(func=...) 分发模式。
+- 阶段2 Day3：pathlib + json 持久化到用户目录；记住 ensure_ascii=False 与 encoding="utf-8" 两个中文坑。
+- 阶段2 Day2：list + dict 存打卡记录并统计。
 - 阶段2 Day1：创建 src/taskboard/cli/daily.py，跑通变量/f-string/datetime。
+- 阶段1 全部通过：uv 环境、src 布局、FastAPI Hello World、GitHub 推送(SSH over 443)、可复现演练、排错手册。踩坑已沉淀至 env-checklist.md（含 winget 需重开终端、uv run 需在项目根、main.py 需在 src 包内、PowerShell UTF-8 BOM、GitHub 22 端口、PSReadLine 粘贴崩溃等）。
 
 ## 复习节点提醒（间隔重复）
 
 - 阶段1：D+4 遮盖 SETUP 重做初始化；D+8 念 env-checklist；D+22 阶段3 时回答"为何 lock 提交、venv 不提交"。
-- 阶段2：每晚 D+1 写 3 张卡；D+2/4/8/21 各 20 分钟只复习到期卡；每周一闭卷重写上周函数。
+- 阶段2 已排定的节点：
+  - D+3（明天）：闭卷重写 TaskStatus 枚举与 status_to_chinese；再闭卷写一个含 2 个字段的 dataclass。
+  - D+4：给 daily.py 加一个 `clear` 子命令练手 argparse。
+  - D+8：生成器表达式、条件表达式、dict.get 默认值、f-string 对齐与 .1f 各写 3 个例子。
+  - D+21：从头默写 daily.py 核心骨架与 domain 模型。
+- 阶段2 通用：每晚 D+1 写 3 张卡；D+2/4/8/21 各 20 分钟只复习到期卡；每周一闭卷重写上周函数。
