@@ -110,7 +110,12 @@ Python 3.11.9 + uv + FastAPI + Pydantic v2 + SQLAlchemy 2.1（同步 Session）+
     - [x] 复习 D+1/D+2 闭卷默写 load_records / save_records
   - [~] W2 看板领域模型(dataclass/Enum) + Markdown 周报
     - [x] Day6 Enum：TaskStatus / TaskPriority + status_to_chinese + domain 包骨架
-    - [ ] Day7 dataclass：Task 对象 + 可变默认值陷阱 + python -m 运行方式
+    - [~] Day7 dataclass：Task 对象 + 可变默认值陷阱 + python -m 运行方式
+      - [x] Step1 D+3 闭卷复习：重写枚举与 status_to_chinese、Note dataclass（练功区 recall_enum_dataclass.py）
+      - [ ] Step2 写 Task 的 6 个字段（title/status/priority/minutes/created_at/tags）
+      - [ ] Step3 运行观察 __repr__ 自动生成（python -m taskboard.domain.task）
+      - [ ] Step4 加实例方法 is_done / finish
+      - [ ] Step5 亲手踩可变默认值陷阱（= [] 与 default_factory 对照）
     - [ ] Day8 对象行为与关系：Board 持有 Task 列表（一对多）与实例方法
     - [ ] Day9 对象 ↔ 字典 ↔ JSON：asdict 落盘与从 JSON 重建对象
     - [ ] Day10 Markdown 周报生成器 + 产出 samples/weekly-report.md
@@ -124,6 +129,8 @@ Python 3.11.9 + uv + FastAPI + Pydantic v2 + SQLAlchemy 2.1（同步 Session）+
 - [ ] 阶段 9 长期深化
 
 ## 学习日志（倒序追加）
+
+- 阶段2 Day7 Step1：完成 D+3 闭卷复习，新建练功区 exercises/recall_enum_dataclass.py（主题命名，不按天）。踩坑：① 在枚举类体内定义方法、且参数注解引用自身类名 → 类定义时 NameError（注解在定义时求值，而类名要到 class 语句结束才绑定）；② else 兜底分支吞掉 DONE，非法值被误显示为"已完成"；③ 字段顺序颠倒 → TypeError: non-default argument 'text' follows default argument。认知修正：Python 3.11 的 dataclass 已直接拒绝 list/dict/set 可变默认值，但普通函数默认值与其它可变对象仍会共享同一实例。
 
 - 阶段2 Day6：建 domain 包，写 TaskStatus / TaskPriority 两个枚举与 status_to_chinese；掌握 Enum 混入 str 的意义、.value 与 .name、按值(圆括号)/按名(方括号)反查；练习结论——裸字符串拼错**不会**抛异常（错误静默漂移到远处才暴露），枚举把失败点提前到边界。
 - 阶段2 Day5：stats 增加最近 7 天柱状图，产出 samples/daily-output.txt。踩坑：替换函数时误删 cmd_add 引发 NameError，并遗留同名 cmd_stats 被后定义覆盖——教训：改完必须 git diff 复核，且"能跑就立刻提交"。
