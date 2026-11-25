@@ -48,6 +48,23 @@ class Task:
     # ValueError: mutable default <class 'list'> ... use default_factory
     # （3.10 及以前不报错，但所有实例会共享同一个列表，是个隐蔽的线上 bug）
 
+    # 方法：判断这个任务是否已完成
+    # 放在类里，是为了让"怎么才算完成"这件事跟着对象走，而不是散落在各个调用处
+    def is_done(self) -> bool:
+        """判断任务是否完成"""
+        # 用 is 而不是 == 比较枚举：枚举成员是全局唯一对象，is 才是"确实是这个成员"的严格判断
+        # 而 == 因为混入了 str，裸字符串 "done" == TaskStatus.DONE 同样成立，
+        # 会把"数据里混进了字符串"这个污染问题悄悄掩盖掉
+        return self.status is TaskStatus.DONE
+
+    # 方法：把任务标记为完成，并记录投入的分钟数
+    def finish(self, minutes: int = 0) -> None:
+        """将任务标记为完成"""
+        # 修改的是实例自己的属性，self 就是调用这个方法的那个任务对象
+        self.status = TaskStatus.DONE
+        # 直接覆盖原有的 minutes（不是累加）：finish 接收的是"本次总共投入了多少分钟"
+        self.minutes = minutes
+
 
 if __name__ == "__main__":
     # 只有以模块方式直接运行本文件时才执行下面这段（被 import 时不执行）
@@ -70,3 +87,18 @@ if __name__ == "__main__":
 
     print(task_2)
     # 打印第二个任务，和第一个对比差别
+
+    done_flag = task_1.is_done()
+    # 调用实例方法，判断任务当前是否已完成；结果存进变量再打印，代码更易读
+
+    print(done_flag)
+    # 输出 False：任务刚创建，状态还是 TODO
+
+    task_1.finish(minutes=120)
+    # 标记为完成，并记录投入 120 分钟
+
+    print(task_1)
+    # 再打印一次：status 变成 DONE，minutes 从 60 被覆盖成 120
+
+    print(task_1.is_done())
+    # 输出 True：状态已经改成完成
