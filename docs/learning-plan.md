@@ -112,10 +112,10 @@ Python 3.11.9 + uv + FastAPI + Pydantic v2 + SQLAlchemy 2.1（同步 Session）+
     - [x] Day6 Enum：TaskStatus / TaskPriority + status_to_chinese + domain 包骨架
     - [~] Day7 dataclass：Task 对象 + 可变默认值陷阱 + python -m 运行方式
       - [x] Step1 D+3 闭卷复习：重写枚举与 status_to_chinese、Note dataclass（练功区 recall_enum_dataclass.py）
-      - [ ] Step2 写 Task 的 6 个字段（title/status/priority/minutes/created_at/tags）
-      - [ ] Step3 运行观察 __repr__ 自动生成（python -m taskboard.domain.task）
-      - [ ] Step4 加实例方法 is_done / finish
-      - [ ] Step5 亲手踩可变默认值陷阱（= [] 与 default_factory 对照）
+      - [x] Step2 写 Task 的 6 个字段（title/status/priority/minutes/created_at/tags）
+      - [x] Step3 运行观察 __repr__ 自动生成（python -m taskboard.domain.task）
+      - [x] Step4 加实例方法 is_done / finish（枚举比较用 is 而非 ==）
+      - [ ] Step5 亲手踩可变默认值陷阱：练功区 mutable_default_experiment.py（Bag 自定义对象 + default_factory 对照）
     - [ ] Day8 对象行为与关系：Board 持有 Task 列表（一对多）与实例方法
     - [ ] Day9 对象 ↔ 字典 ↔ JSON：asdict 落盘与从 JSON 重建对象
     - [ ] Day10 Markdown 周报生成器 + 产出 samples/weekly-report.md
@@ -130,6 +130,7 @@ Python 3.11.9 + uv + FastAPI + Pydantic v2 + SQLAlchemy 2.1（同步 Session）+
 
 ## 学习日志（倒序追加）
 
+- 阶段2 Day7 Step2-4：写出 domain/task.py 的 Task dataclass（6 个字段）+ is_done / finish 两个实例方法。踩坑：① 枚举导入名拼错 TaskPrioty → ImportError 当场报错（这正是约束前置的日常版本）；② status 漏默认值 → 变成必填参数，TypeError: missing 1 required positional argument；③ 用 field(default=date.today()) 而非 default_factory= → 日期被固化成"模块导入那一天"；④ 用 == 比较枚举会掩盖"数据里混入裸字符串"的污染，必须用 is。认知：JSON 序列化时枚举自动变 "todo"（混入 str 的功劳），但 date 不行，需 default=str；反序列化时用 TaskStatus(value) 把字符串转回枚举，拼错当场 ValueError。
 - 阶段2 Day7 Step1：完成 D+3 闭卷复习，新建练功区 exercises/recall_enum_dataclass.py（主题命名，不按天）。踩坑：① 在枚举类体内定义方法、且参数注解引用自身类名 → 类定义时 NameError（注解在定义时求值，而类名要到 class 语句结束才绑定）；② else 兜底分支吞掉 DONE，非法值被误显示为"已完成"；③ 字段顺序颠倒 → TypeError: non-default argument 'text' follows default argument。认知修正：Python 3.11 的 dataclass 已直接拒绝 list/dict/set 可变默认值，但普通函数默认值与其它可变对象仍会共享同一实例。
 
 - 阶段2 Day6：建 domain 包，写 TaskStatus / TaskPriority 两个枚举与 status_to_chinese；掌握 Enum 混入 str 的意义、.value 与 .name、按值(圆括号)/按名(方括号)反查；练习结论——裸字符串拼错**不会**抛异常（错误静默漂移到远处才暴露），枚举把失败点提前到边界。
